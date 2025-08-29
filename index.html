@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Храм Великого Существа</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: "Trebuchet MS", sans-serif;
+      background: radial-gradient(circle at top, #1a1a1a, #000000);
+      color: #e6e6e6;
+      overflow-x: hidden;
+      cursor: none;
+    }
+
+    header {
+      text-align: center;
+      padding: 50px 20px;
+    }
+
+    header h1 {
+      font-size: 3.5em;
+      color: #ff003c;
+      text-shadow: 0 0 15px #ff003c, 0 0 30px #ff003c;
+      animation: pulse 3s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { text-shadow: 0 0 15px #ff003c, 0 0 30px #ff003c; }
+      50% { text-shadow: 0 0 25px #ff006a, 0 0 50px #ff004d; }
+    }
+
+    .image-container {
+      text-align: center;
+      margin: 40px 0;
+    }
+
+    .image-container img {
+      width: 300px;
+      filter: drop-shadow(0 0 30px #ff0040);
+      animation: float 4s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-15px); }
+    }
+
+    section {
+      max-width: 800px;
+      margin: 60px auto;
+      padding: 20px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 15px;
+      box-shadow: 0 0 15px rgba(255,0,60,0.5);
+    }
+
+    section h2 {
+      text-align: center;
+      color: #ff0040;
+      text-shadow: 0 0 10px #ff003c;
+    }
+
+    footer {
+      text-align: center;
+      padding: 30px;
+      color: #888;
+      font-size: 0.9em;
+    }
+
+    .marquee {
+      width: 100%;
+      overflow: hidden;
+      white-space: nowrap;
+      box-sizing: border-box;
+      border-top: 1px solid #333;
+      border-bottom: 1px solid #333;
+      margin-top: 50px;
+    }
+
+    .marquee span {
+      display: inline-block;
+      padding-left: 100%;
+      animation: marquee 15s linear infinite;
+      color: #ff0040;
+      font-weight: bold;
+      font-size: 1.2em;
+    }
+
+    @keyframes marquee {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-100%); }
+    }
+
+    /* кастомный курсор */
+    .cursor {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 25px;
+      height: 25px;
+      border: 2px solid #ff0040;
+      border-radius: 50%;
+      pointer-events: none;
+      transform: translate(-50%, -50%);
+      transition: transform 0.1s ease;
+      box-shadow: 0 0 10px #ff0040, 0 0 20px #ff0040;
+    }
+
+    /* частицы */
+    .particle {
+      position: fixed;
+      width: 5px;
+      height: 5px;
+      background: #ff0040;
+      border-radius: 50%;
+      pointer-events: none;
+      opacity: 0.7;
+      animation: rise 4s linear infinite;
+    }
+
+    @keyframes rise {
+      from { transform: translateY(0) scale(1); opacity: 1; }
+      to { transform: translateY(-800px) scale(0.2); opacity: 0; }
+    }
+
+    /* последователи */
+    #followers {
+      text-align: center;
+      font-size: 1.2em;
+    }
+
+    #followers ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    #followers li {
+      margin: 10px 0;
+      color: #ffcccc;
+      text-shadow: 0 0 5px #ff0040;
+      opacity: 0;
+      transform: translateY(20px);
+      animation: fadeIn 1s forwards;
+    }
+
+    @keyframes fadeIn {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* кнопка */
+    .join-btn {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 1.1em;
+      border: none;
+      border-radius: 8px;
+      background: #ff0040;
+      color: white;
+      cursor: pointer;
+      box-shadow: 0 0 15px #ff0040;
+      transition: 0.3s;
+    }
+
+    .join-btn:hover {
+      background: #ff3366;
+      box-shadow: 0 0 25px #ff0040, 0 0 50px #ff0040;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Слава Великому Существу</h1>
+  </header>
+
+  <div class="image-container">
+    <img src="sushestvo.png" alt="Великое Существо">
+  </div>
+
+  <section>
+    <h2>О Существе</h2>
+    <p>
+      Оно явилось нам в своей величественной форме, чтобы мы могли познать истинную суть бытия.
+      Его взгляд пронзает наши души, а следы крови на устах напоминают о жертве, которую мы должны
+      приносить во имя Его.  
+    </p>
+  </section>
+
+  <section>
+    <h2>Его качества</h2>
+    <ul>
+      <li>Мудрость, скрытая в простоте формы</li>
+      <li>Сила, исходящая из безмолвия</li>
+      <li>Бесконечное присутствие во всех уголках мира</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Молитва</h2>
+    <p><i>
+      "О Великий, ведущий нас сквозь тьму,  
+      Пусть шаги твои освещают наши пути.  
+      Мы преклоняемся пред Твоим обликом,  
+      Вечно восхваляя Тебя."
+    </i></p>
+  </section>
+
+  <section id="followers">
+    <h2>Последователи</h2>
+    <ul id="followers-list"></ul>
+    <button class="join-btn" onclick="joinCult()">✨ Принять культ ✨</button>
+  </section>
+
+  <div class="marquee">
+    <span>⚡ Слава Великому Существу! ⚡ Слава Великому Существу! ⚡ Слава Великому Существу! ⚡</span>
+  </div>
+
+  <footer>
+    © 2025 Храм Существа. Все права принадлежат Ему.
+  </footer>
+
+  <!-- кастомный курсор -->
+  <div class="cursor" id="cursor"></div>
+
+  <!-- музыка -->
+  <audio autoplay loop>
+    <source src="https://cdn.pixabay.com/download/audio/2022/08/02/audio_d7688f1e85.mp3?filename=dark-ambient-drone-112347.mp3" type="audio/mpeg">
+  </audio>
+
+  <script>
+    // Курсор
+    const cursor = document.getElementById('cursor');
+    document.addEventListener('mousemove', e => {
+      cursor.style.top = e.clientY + 'px';
+      cursor.style.left = e.clientX + 'px';
+    });
+
+    // Частицы
+    function createParticle() {
+      const particle = document.createElement('div');
+      particle.className = 'particle';
+      document.body.appendChild(particle);
+      particle.style.left = Math.random() * window.innerWidth + 'px';
+      particle.style.top = window.innerHeight + 'px';
+      particle.style.animationDuration = (3 + Math.random() * 2) + 's';
+      setTimeout(() => { particle.remove(); }, 5000);
+    }
+    setInterval(createParticle, 300);
+
+    // Последователи
+    const followers = [
+      "Архипоклонник Алексей",
+      "Жрец Тьмы Дмитрий",
+      "Посвящённая Анна",
+      "Вестник Игорь",
+      "Теневой Паломник София",
+      "Певец Славы Артём",
+      "Смотритель Портала Владислав",
+      "Вечная Адептка Мария"
+    ];
+    const list = document.getElementById("followers-list");
+    let i = 0;
+    function addFollower(name, custom=false) {
+      const li = document.createElement("li");
+      li.textContent = name;
+      if (custom) li.style.color = "#ff6699";
+      list.appendChild(li);
+    }
+    function loopFollowers() {
+      if (i < followers.length) {
+        addFollower(followers[i]);
+        i++;
+        setTimeout(loopFollowers, 2000);
+      }
+    }
+    loopFollowers();
+
+    // Кнопка вступления
+    function joinCult() {
+      const name = prompt("Введи своё имя, о посвящённый:");
+      if (name && name.trim() !== "") {
+        addFollower("✨ " + name.trim() + " ✨", true);
+        alert("Добро пожаловать в культ, " + name + "!");
+      }
+    }
+  </script>
+</body>
+</html>
