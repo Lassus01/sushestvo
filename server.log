@@ -1,0 +1,8 @@
+
+> app@1.0.0 start /app
+> node server.js
+
+Temple server running on port 3000
+Cultist connected: rYpoXGWlutTYNqIcAAAB
+Message received: { username: 'CultistOne', message: 'Hello abyss!', rank: 'Неофит' }
+Cultist disconnected: rYpoXGWlutTYNqIcAAAB
