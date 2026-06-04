@@ -887,6 +887,18 @@
                 if (audio) {
                     audio.playbackRate = 0.5; // slow down music during dive
                 }
+
+                // Fullscreen transition
+                renderer.domElement.style.position = 'fixed';
+                renderer.domElement.style.top = '50%';
+                renderer.domElement.style.left = '50%';
+                renderer.domElement.style.transform = 'translate(-50%, -50%)';
+                renderer.domElement.style.zIndex = '9998';
+                renderer.domElement.style.transition = 'width 2s ease, height 2s ease';
+                renderer.domElement.style.width = '100vw';
+                renderer.domElement.style.height = '100vh';
+                renderer.domElement.style.objectFit = 'cover';
+
             } else if (!currentUser) {
                 // Optional: visual feedback if not initiated
                 renderer.domElement.style.filter = "drop-shadow(0 0 40px #ff00ea)";
@@ -917,7 +929,7 @@
             creature.rotation.y += 0.01;
 
             if (isDiving) {
-                camera.position.z -= 0.05;
+                camera.position.z -= 0.03; // Adjusted for ~2s transition
                 creature.rotation.x += 0.05;
                 creature.rotation.y += 0.1;
 
@@ -926,6 +938,17 @@
                     camera.position.z = 4; // reset for when game closes
                     const audio = document.getElementById('bg-music');
                     if (audio) audio.playbackRate = 1.0;
+
+                    // Reset DOM element styles
+                    renderer.domElement.style.position = 'static';
+                    renderer.domElement.style.top = 'auto';
+                    renderer.domElement.style.left = 'auto';
+                    renderer.domElement.style.transform = 'none';
+                    renderer.domElement.style.zIndex = 'auto';
+                    renderer.domElement.style.transition = 'none';
+                    renderer.domElement.style.width = '300px';
+                    renderer.domElement.style.height = '300px';
+                    renderer.domElement.style.objectFit = 'fill';
 
                     const game = new SpaceGame(currentUser);
                     game.start();

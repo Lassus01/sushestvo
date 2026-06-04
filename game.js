@@ -220,22 +220,21 @@ class SpaceGame {
         this.animationId = requestAnimationFrame(this.gameLoop.bind(this));
     }
 
-    checkCollisions() {
-        // AABB collision helper
-        const collides = (a, b) => {
-            return a.x < b.x + (b.width || b.size * 2) &&
-                   a.x + (a.width || a.size * 2) > b.x &&
-                   a.y < b.y + (b.height || b.size * 2) &&
-                   a.y + (a.height || a.size * 2) > b.y;
-        };
+    collides(a, b) {
+        return a.x < b.x + (b.width || b.size * 2) &&
+               a.x + (a.width || a.size * 2) > b.x &&
+               a.y < b.y + (b.height || b.size * 2) &&
+               a.y + (a.height || a.size * 2) > b.y;
+    }
 
+    checkCollisions() {
         // Player bullets vs Enemies
         for (let i = this.bullets.length - 1; i >= 0; i--) {
             const bullet = this.bullets[i];
             let bulletRemoved = false;
             for (let j = this.enemies.length - 1; j >= 0; j--) {
                 const enemy = this.enemies[j];
-                if (collides(bullet, enemy)) {
+                if (this.collides(bullet, enemy)) {
                     enemy.hp -= bullet.damage;
                     if (enemy.hp <= 0) {
                         this.score += enemy.scoreValue;
@@ -269,7 +268,7 @@ class SpaceGame {
         if (this.player.invulnerable <= 0) {
             for (let i = this.enemyBullets.length - 1; i >= 0; i--) {
                 const bullet = this.enemyBullets[i];
-                if (collides(bullet, this.player)) {
+                if (this.collides(bullet, this.player)) {
                     this.enemyBullets.splice(i, 1);
                     this.lives--;
                     this.player.invulnerable = 2.0; // 2 seconds if hit
@@ -279,7 +278,7 @@ class SpaceGame {
 
             // Enemies vs Player
             for (let i = this.enemies.length - 1; i >= 0; i--) {
-                if (collides(this.enemies[i], this.player)) {
+                if (this.collides(this.enemies[i], this.player)) {
                     this.enemies.splice(i, 1);
                     this.lives--;
                     this.player.invulnerable = 2.0;
@@ -339,7 +338,7 @@ class SpaceGame {
 
         // Powerups vs Player
         for (let i = this.powerups.length - 1; i >= 0; i--) {
-            if (collides(this.powerups[i], this.player)) {
+            if (this.collides(this.powerups[i], this.player)) {
                 if (this.powerups[i].type === 'weapon') {
                     this.player.weaponLevel = Math.min(3, this.player.weaponLevel + 1);
                 } else if (this.powerups[i].type === 'life') {
@@ -472,6 +471,13 @@ class SpaceGame {
         this.ctx.textAlign = 'right';
         this.ctx.fillText(`Жизни: ${this.lives}`, this.canvas.width - 20, 20);
         this.ctx.fillText(`Оружие: Ур.${this.player.weaponLevel}`, this.canvas.width - 20, 50);
+
+        // Controls guide
+        this.ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+        this.ctx.font = '14px "Montserrat", sans-serif';
+        this.ctx.fillText('Стрелки - Движение', this.canvas.width - 20, 80);
+        this.ctx.fillText('Пробел - Выстрел', this.canvas.width - 20, 100);
+        this.ctx.fillText('Escape - Выход', this.canvas.width - 20, 120);
     }
 
     drawGameOver() {
