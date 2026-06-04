@@ -85,7 +85,9 @@
     }
 
     .image-container {
-      text-align: center;
+      display: flex;
+      justify-content: center;
+      align-items: center;
       margin: 40px 0;
       position: relative;
     }
@@ -487,6 +489,7 @@
   </style>
 </head>
 <body>
+  <div id="bg-eyes-container" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -2; pointer-events: none; opacity: 0.15;" aria-hidden="true"></div>
   <header>
     <div style="position: absolute; top: 20px; right: 20px; z-index: 100;">
         <button id="lang-toggle" class="btn" style="margin-top: 0; padding: 10px 20px; font-size: 1em;">EN</button>
@@ -914,6 +917,83 @@
 
     // Initialize ThreeJS after a short delay to ensure DOM layout
     setTimeout(initThreeJS, 100);
+
+    // --- Background Eyes Logic ---
+    function initBgEyes() {
+        const bgContainer = document.getElementById('bg-eyes-container');
+        if (!bgContainer) return;
+
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        bgContainer.appendChild(renderer.domElement);
+
+        const eyes = [];
+        const numEyes = 15;
+
+        const eyeGeo = new THREE.SphereGeometry(1, 32, 32);
+        const eyeMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+        const pupilGeo = new THREE.SphereGeometry(0.4, 32, 32);
+        const pupilMat = new THREE.MeshBasicMaterial({ color: 0x000000 });
+
+        for (let i = 0; i < numEyes; i++) {
+            const eye = new THREE.Mesh(eyeGeo, eyeMat);
+            const pupil = new THREE.Mesh(pupilGeo, pupilMat);
+            pupil.position.z = 0.8;
+            eye.add(pupil);
+
+            // Random position in 3D space
+            eye.position.x = (Math.random() - 0.5) * 40;
+            eye.position.y = (Math.random() - 0.5) * 40;
+            eye.position.z = (Math.random() - 0.5) * 20 - 10;
+
+            // Random animation offset
+            eye.userData = {
+                offsetY: Math.random() * Math.PI * 2,
+                speed: 0.5 + Math.random() * 1.5
+            };
+
+            scene.add(eye);
+            eyes.push(eye);
+        }
+
+        camera.position.z = 15;
+
+        let mouseX = 0;
+        let mouseY = 0;
+
+        document.addEventListener('mousemove', (event) => {
+            mouseX = (event.clientX / window.innerWidth) * 2 - 1;
+            mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
+        });
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        function animateBg() {
+            requestAnimationFrame(animateBg);
+            const time = Date.now() * 0.001;
+
+            eyes.forEach(eye => {
+                // Floating effect
+                eye.position.y += Math.sin(time * eye.userData.speed + eye.userData.offsetY) * 0.01;
+
+                // Look at mouse
+                const targetX = mouseX * 20;
+                const targetY = mouseY * 20;
+                eye.lookAt(targetX, targetY, camera.position.z);
+            });
+
+            renderer.render(scene, camera);
+        }
+        animateBg();
+    }
+    setTimeout(initBgEyes, 150);
 
     // --- Socket.io Chat & Runes ---
     const socket = typeof io !== 'undefined' ? io() : null;
