@@ -52,6 +52,24 @@ class SpaceGame {
     resize() {
         this.canvas.width = window.innerWidth;
         this.canvas.height = window.innerHeight;
+
+        // Pillarboxing logic: Fixed 3:4 aspect ratio for gameplay area
+        const targetRatio = 3 / 4;
+        const currentRatio = this.canvas.width / this.canvas.height;
+
+        if (currentRatio > targetRatio) {
+            // Screen is wider than needed, pillarbox sides
+            this.gameHeight = this.canvas.height;
+            this.gameWidth = this.canvas.height * targetRatio;
+            this.offsetX = (this.canvas.width - this.gameWidth) / 2;
+            this.offsetY = 0;
+        } else {
+            // Screen is taller than needed, letterbox top/bottom
+            this.gameWidth = this.canvas.width;
+            this.gameHeight = this.canvas.width / targetRatio;
+            this.offsetX = 0;
+            this.offsetY = (this.canvas.height - this.gameHeight) / 2;
+        }
     }
 
     initStars() {
@@ -137,16 +155,18 @@ class SpaceGame {
         this.lives = 3;
 
         this.player = {
-            x: this.canvas.width / 2,
-            y: this.canvas.height - 50,
+            x: this.offsetX + this.gameWidth / 2 - 20,
+            y: this.offsetY + this.gameHeight - 60,
             width: 40,
             height: 30,
-            speed: 300,
-            color: '#00ffea',
+            hitboxRatio: 0.3, // Core hitbox is 30% of visual width/height
+            speed: 350,
+            color: '#ff003c', // Player = Red/Warm
             lastShot: 0,
             shotDelay: 0.2, // seconds
             invulnerable: 0,
-            weaponLevel: 1
+            weaponModifier: 'normal', // normal, scatter, piercing, orbital
+            modifierTimer: 0
         };
 
         this.bullets = [];
@@ -154,54 +174,101 @@ class SpaceGame {
         this.enemyBullets = [];
         this.particles = [];
         this.powerups = [];
+        this.obelisks = [];
+
+        this.initObelisks();
+        // Global Swarm Controller
+        this.swarmDirection = 1;
+        this.swarmSpeed = 20;
+        this.swarmDropAmount = 30;
 
         this.generateLevel(this.level);
     }
 
+    initObelisks() {
+        this.obelisks = [];
+        const numObelisks = 4;
+        const spacing = this.gameWidth / (numObelisks + 1);
+
+        for (let i = 0; i < numObelisks; i++) {
+            this.obelisks.push({
+                x: this.offsetX + spacing * (i + 1) - 30,
+                y: this.offsetY + this.gameHeight - 150,
+                width: 60,
+                height: 40,
+                hp: 15, // Degrades as it takes damage
+                color: '#666'
+            });
+        }
+    }
+
     generateLevel(levelNum) {
         this.enemies = [];
+        this.swarmDirection = 1;
+        this.swarmSpeed = 30 + (levelNum * 5);
 
         const isBoss = levelNum % 10 === 0;
 
         if (isBoss) {
             this.enemies.push({
-                x: this.canvas.width / 2 - 100,
-                y: 50,
+                x: this.offsetX + this.gameWidth / 2 - 100,
+                y: this.offsetY + 50,
                 width: 200,
                 height: 100,
                 hp: 100 + (levelNum * 10),
-                speed: 100 + (levelNum * 2),
                 color: '#ff003c',
                 scoreValue: 1000,
                 fireRate: Math.max(0.2, 1.0 - (levelNum * 0.05)),
                 lastFire: 0,
                 type: 'boss',
-                direction: 1
+                independent: true, // Bosses move independently of the swarm
+                direction: 1,
+                speed: 100 + (levelNum * 2)
             });
         } else {
-            const rows = Math.min(5, 2 + Math.floor(levelNum / 5));
-            const cols = Math.min(10, 4 + Math.floor(levelNum / 3));
+            const rows = Math.min(6, 3 + Math.floor(levelNum / 4));
+            const cols = Math.min(10, 5 + Math.floor(levelNum / 3));
 
-            const startX = 50;
-            const startY = 50;
-            const spacingX = 60;
-            const spacingY = 50;
+            const spacingX = 50;
+            const spacingY = 45;
+
+            // Center the swarm
+            const swarmWidth = cols * spacingX;
+            const startX = this.offsetX + (this.gameWidth - swarmWidth) / 2;
+            const startY = this.offsetY + 50;
 
             for (let r = 0; r < rows; r++) {
                 for (let c = 0; c < cols; c++) {
+                    // Determine enemy type based on row and level
+                    let type = 'normal'; // Послушники
+                    let color = '#ff006a';
+                    let hp = 1 + Math.floor(levelNum / 10);
+
+                    if (r === 0 && levelNum > 2) {
+                        type = 'shield'; // Щитоносцы (frontal invulnerability handled in collision)
+                        color = '#888888';
+                        hp = 2 + Math.floor(levelNum / 5);
+                    } else if (r === rows - 1 && levelNum > 4 && Math.random() < 0.2) {
+                        type = 'kamikaze'; // Ловчие
+                        color = '#00ff00';
+                    } else if (levelNum > 6 && Math.random() < 0.1) {
+                        type = 'phantom'; // Мерцающие Ужасы
+                        color = 'rgba(150, 0, 255, 0.8)';
+                    }
+
                     this.enemies.push({
                         x: startX + c * spacingX,
                         y: startY + r * spacingY,
                         width: 30,
                         height: 30,
-                        hp: 1 + Math.floor(levelNum / 10),
-                        speed: 20 + (levelNum * 2),
-                        color: r === 0 ? '#ff006a' : '#ff003c',
+                        hp: hp,
+                        color: color,
                         scoreValue: 10 * (rows - r),
                         fireRate: Math.max(0.5, 3.0 - (levelNum * 0.1)),
                         lastFire: Math.random() * 2, // stagger initial fire
-                        type: 'normal',
-                        direction: 1
+                        type: type,
+                        state: 'swarm', // 'swarm', 'diving' (for kamikaze), 'intangible' (for phantom)
+                        timer: 0 // generic timer for state changes
                     });
                 }
             }
@@ -221,42 +288,104 @@ class SpaceGame {
     }
 
     collides(a, b) {
-        return a.x < b.x + (b.width || b.size * 2) &&
-               a.x + (a.width || a.size * 2) > b.x &&
-               a.y < b.y + (b.height || b.size * 2) &&
-               a.y + (a.height || a.size * 2) > b.y;
+        // Handle smaller core hitbox for player
+        let aX = a.x, aY = a.y, aW = a.width || a.size * 2, aH = a.height || a.size * 2;
+        if (a === this.player) {
+            aW *= a.hitboxRatio; aH *= a.hitboxRatio;
+            aX += (a.width - aW) / 2; aY += (a.height - aH) / 2;
+        }
+
+        let bX = b.x, bY = b.y, bW = b.width || b.size * 2, bH = b.height || b.size * 2;
+        if (b === this.player) {
+            bW *= b.hitboxRatio; bH *= b.hitboxRatio;
+            bX += (b.width - bW) / 2; bY += (b.height - bH) / 2;
+        }
+
+        return aX < bX + bW &&
+               aX + aW > bX &&
+               aY < bY + bH &&
+               aY + aH > bY;
     }
 
-    checkCollisions() {
+    checkCollisions(dt) {
         // Player bullets vs Enemies
         for (let i = this.bullets.length - 1; i >= 0; i--) {
             const bullet = this.bullets[i];
             let bulletRemoved = false;
             for (let j = this.enemies.length - 1; j >= 0; j--) {
                 const enemy = this.enemies[j];
+
+                // Phantoms are immune while intangible
+                if (enemy.type === 'phantom' && enemy.state === 'intangible') continue;
+
                 if (this.collides(bullet, enemy)) {
-                    enemy.hp -= bullet.damage;
+                    // Shield bearers take no damage from front (bottom of enemy)
+                    if (enemy.type === 'shield' && bullet.y > enemy.y + enemy.height / 2) {
+                        // Deflected! Create a visual spark later, for now just remove bullet
+                    } else {
+                        enemy.hp -= bullet.damage;
+                    }
+
                     if (enemy.hp <= 0) {
                         this.score += enemy.scoreValue;
+
+                        // Scatter modifier explosion on kill
+                        if (bullet.scatter) {
+                            const scatLevel = bullet.scatterLevel || 1;
+                            const splinters = 2 + scatLevel;
+                            for (let s = 0; s < splinters; s++) {
+                                const angle = -Math.PI/2 + (Math.PI * s / Math.max(1, splinters - 1)); // Spread out downwards
+                                this.bullets.push({
+                                    x: enemy.x + enemy.width/2, y: enemy.y + enemy.height,
+                                    width: 4, height: 10, speed: 400, damage: 0.5 + (scatLevel * 0.1), color: '#ffaa00',
+                                    vx: Math.cos(angle) * 300, vy: Math.abs(Math.sin(angle)) * 300
+                                });
+                            }
+                        }
+
                         // Chance for powerup
-                        if (Math.random() < 0.05) {
+                        if (Math.random() < 0.1) {
+                            const pTypes = ['life', 'scatter', 'piercing', 'orbital'];
+                            const pType = pTypes[Math.floor(Math.random() * pTypes.length)];
                             this.powerups.push({
                                 x: enemy.x + enemy.width / 2 - 10,
                                 y: enemy.y,
                                 width: 20,
                                 height: 20,
-                                type: Math.random() < 0.2 ? 'life' : 'weapon',
-                                color: '#ffff00'
+                                type: pType,
+                                color: pType === 'life' ? '#ff0000' : '#00ffff'
                             });
                         }
                         this.enemies.splice(j, 1);
                     }
-                    this.bullets.splice(i, 1);
-                    bulletRemoved = true;
-                    break;
+
+                    if (bullet.piercing) {
+                        bullet.damage *= 0.5; // Damage reduces after passing through
+                        if (bullet.damage < 0.2) {
+                            this.bullets.splice(i, 1);
+                            bulletRemoved = true;
+                        }
+                    } else {
+                        this.bullets.splice(i, 1);
+                        bulletRemoved = true;
+                        break;
+                    }
                 }
             }
             if (bulletRemoved) continue;
+
+            // Bullet vs Obelisks
+            if (!bulletRemoved) {
+                for (let k = this.obelisks.length - 1; k >= 0; k--) {
+                    if (this.collides(bullet, this.obelisks[k])) {
+                        this.obelisks[k].hp -= bullet.damage;
+                        if (this.obelisks[k].hp <= 0) this.obelisks.splice(k, 1);
+                        this.bullets.splice(i, 1);
+                        bulletRemoved = true;
+                        break;
+                    }
+                }
+            }
 
             // Remove bullets off screen
             if (bullet.y < -10) {
@@ -264,7 +393,7 @@ class SpaceGame {
             }
         }
 
-        // Enemy bullets vs Player
+        // Enemy bullets vs Player & Obelisks
         if (this.player.invulnerable <= 0) {
             for (let i = this.enemyBullets.length - 1; i >= 0; i--) {
                 const bullet = this.enemyBullets[i];
@@ -273,6 +402,16 @@ class SpaceGame {
                     this.lives--;
                     this.player.invulnerable = 2.0; // 2 seconds if hit
                     if (this.lives <= 0) this.gameOver();
+                    continue; // Skip obelisk check if hit player
+                }
+
+                for (let k = this.obelisks.length - 1; k >= 0; k--) {
+                    if (this.collides(bullet, this.obelisks[k])) {
+                        this.obelisks[k].hp -= 1; // Enemy bullets do 1 dmg to cover
+                        if (this.obelisks[k].hp <= 0) this.obelisks.splice(k, 1);
+                        this.enemyBullets.splice(i, 1);
+                        break;
+                    }
                 }
             }
 
@@ -283,6 +422,56 @@ class SpaceGame {
                     this.lives--;
                     this.player.invulnerable = 2.0;
                     if (this.lives <= 0) this.gameOver();
+                }
+            }
+        }
+
+        // Powerups vs Player
+        for (let i = this.powerups.length - 1; i >= 0; i--) {
+            if (this.collides(this.powerups[i], this.player)) {
+                if (this.powerups[i].type === 'life') {
+                    this.lives++;
+                } else {
+                    if (this.player.weaponModifier === this.powerups[i].type) {
+                        this.player.modifierLevel++; // Level up the modifier
+                    } else {
+                        this.player.weaponModifier = this.powerups[i].type;
+                        this.player.modifierLevel = 1;
+                    }
+                    this.player.modifierTimer = 10.0 + (this.player.modifierLevel * 2); // Time increases with level
+                }
+                this.powerups.splice(i, 1);
+            }
+        }
+
+        // Orbital vs Enemy Bullets/Enemies
+        if (this.player.weaponModifier === 'orbital') {
+            const level = this.player.modifierLevel || 1;
+            const orbitalsCount = Math.min(4, level);
+            const radius = 40 + (level * 5);
+
+            for (let o = 0; o < orbitalsCount; o++) {
+                const angle = (performance.now() / 200) + (o * (Math.PI * 2 / orbitalsCount));
+                const orbital = {
+                    x: this.player.x + this.player.width/2 + Math.cos(angle) * radius - 10,
+                    y: this.player.y + this.player.height/2 + Math.sin(angle) * radius - 10,
+                    width: 20, height: 20
+                };
+
+                for (let i = this.enemyBullets.length - 1; i >= 0; i--) {
+                    if (this.collides(orbital, this.enemyBullets[i])) {
+                        this.enemyBullets.splice(i, 1);
+                    }
+                }
+
+                for (let i = this.enemies.length - 1; i >= 0; i--) {
+                    if (this.collides(orbital, this.enemies[i])) {
+                        this.enemies[i].hp -= (5 + level * 2) * dt; // Continuous damage, scales with level
+                        if (this.enemies[i].hp <= 0) {
+                            this.score += this.enemies[i].scoreValue;
+                            this.enemies.splice(i, 1);
+                        }
+                    }
                 }
             }
         }
@@ -301,10 +490,19 @@ class SpaceGame {
             this.player.x += this.player.speed * dt;
         }
 
-        // Clamp player
-        if (this.player.x < 0) this.player.x = 0;
-        if (this.player.x + this.player.width > this.canvas.width) {
-            this.player.x = this.canvas.width - this.player.width;
+        // Clamp player to gameplay area
+        if (this.player.x < this.offsetX) this.player.x = this.offsetX;
+        if (this.player.x + this.player.width > this.offsetX + this.gameWidth) {
+            this.player.x = this.offsetX + this.gameWidth - this.player.width;
+        }
+
+        // Modifiers Timer
+        if (this.player.modifierTimer > 0) {
+            this.player.modifierTimer -= dt;
+            if (this.player.modifierTimer <= 0) {
+                this.player.weaponModifier = 'normal';
+                this.player.modifierLevel = 1;
+            }
         }
 
         // Shooting
@@ -315,76 +513,121 @@ class SpaceGame {
             this.player.lastShot -= dt;
         }
         if (this.keys.Space && this.player.lastShot <= 0) {
-            if (this.player.weaponLevel === 1) {
-                this.bullets.push({ x: this.player.x + this.player.width / 2 - 2.5, y: this.player.y, width: 5, height: 15, speed: 600, damage: 1, color: '#00ffea' });
-            } else if (this.player.weaponLevel === 2) {
-                this.bullets.push({ x: this.player.x + 5, y: this.player.y, width: 5, height: 15, speed: 600, damage: 1, color: '#00ffea' });
-                this.bullets.push({ x: this.player.x + this.player.width - 10, y: this.player.y, width: 5, height: 15, speed: 600, damage: 1, color: '#00ffea' });
+            const bx = this.player.x + this.player.width / 2 - 2.5;
+            const by = this.player.y;
+            const level = this.player.modifierLevel || 1;
+
+            if (this.player.weaponModifier === 'scatter') {
+                // Scatter scales with level
+                const scatterDmg = 0.5 + (level * 0.1);
+                this.bullets.push({ x: bx, y: by, width: 5, height: 15, speed: 600, damage: scatterDmg, color: '#ffaa00', scatter: true, scatterLevel: level });
+
+                // Add more angled projectiles based on level
+                for (let i = 1; i <= Math.min(4, level); i++) {
+                    const angleSpread = 50 * i;
+                    this.bullets.push({ x: bx - 10*i, y: by + 5*i, width: 5, height: 15, speed: 600, damage: scatterDmg, color: '#ffaa00', scatter: true, scatterLevel: level, vx: -angleSpread });
+                    this.bullets.push({ x: bx + 10*i, y: by + 5*i, width: 5, height: 15, speed: 600, damage: scatterDmg, color: '#ffaa00', scatter: true, scatterLevel: level, vx: angleSpread });
+                }
+            } else if (this.player.weaponModifier === 'piercing') {
+                // Piercing scales size and damage with level
+                const pWidth = 9 + (level * 2);
+                const pDmg = 2 + (level * 0.5);
+                this.bullets.push({ x: bx - pWidth/2 + 2.5, y: by - 20, width: pWidth, height: 40 + (level * 5), speed: 800, damage: pDmg, color: '#00ffff', piercing: true });
             } else {
-                this.bullets.push({ x: this.player.x + 5, y: this.player.y, width: 5, height: 15, speed: 600, damage: 1, color: '#00ffea' });
-                this.bullets.push({ x: this.player.x + this.player.width / 2 - 2.5, y: this.player.y - 10, width: 5, height: 15, speed: 600, damage: 1.5, color: '#00ffea' });
-                this.bullets.push({ x: this.player.x + this.player.width - 10, y: this.player.y, width: 5, height: 15, speed: 600, damage: 1, color: '#00ffea' });
+                this.bullets.push({ x: bx, y: by, width: 5, height: 15, speed: 600, damage: 1, color: '#ff003c' }); // Warm/Red for standard
             }
-            this.player.lastShot = this.player.shotDelay;
+            this.player.lastShot = Math.max(0.05, this.player.shotDelay - (level > 1 ? 0.02 * level : 0)); // Slight fire rate boost per level
         }
 
         // Update bullets
-        this.bullets.forEach(b => b.y -= b.speed * dt);
+        this.bullets.forEach(b => {
+            b.y -= b.speed * dt;
+            if (b.vx) b.x += b.vx * dt;
+            if (b.vy) b.y += b.vy * dt;
+        });
         this.enemyBullets.forEach(b => b.y += b.speed * dt);
         this.enemyBullets = this.enemyBullets.filter(b => b.y < this.canvas.height + 10);
 
         // Update powerups
         this.powerups.forEach(p => p.y += 100 * dt);
 
-        // Powerups vs Player
-        for (let i = this.powerups.length - 1; i >= 0; i--) {
-            if (this.collides(this.powerups[i], this.player)) {
-                if (this.powerups[i].type === 'weapon') {
-                    this.player.weaponLevel = Math.min(3, this.player.weaponLevel + 1);
-                } else if (this.powerups[i].type === 'life') {
-                    this.lives++;
+        // Global Swarm Movement
+        let edgeHit = false;
+
+        // Pre-calculate edge hits for the swarm
+        for (const e of this.enemies) {
+            if (e.state === 'swarm' && !e.independent) {
+                const nextX = e.x + this.swarmSpeed * dt * this.swarmDirection;
+                if (nextX < this.offsetX || nextX + e.width > this.offsetX + this.gameWidth) {
+                    edgeHit = true;
+                    break;
                 }
-                this.powerups.splice(i, 1);
             }
         }
-
-        // Enemies movement and firing
-        let edgeHit = false;
-        this.enemies.forEach(e => {
-            if (e.type === 'boss') {
-                e.x += e.speed * dt * e.direction;
-                if (e.x < 0 || e.x + e.width > this.canvas.width) {
-                    e.direction *= -1;
-                    e.x = Math.max(0, Math.min(e.x, this.canvas.width - e.width));
-                }
-            } else {
-                e.x += e.speed * dt * e.direction;
-                if (e.x < 0 || e.x + e.width > this.canvas.width) {
-                    edgeHit = true;
-                }
-            }
-
-            e.lastFire -= dt;
-            if (e.lastFire <= 0) {
-                if (Math.random() < 0.1 || e.type === 'boss') { // Small chance to fire or boss always fires
-                    this.enemyBullets.push({
-                        x: e.x + e.width / 2,
-                        y: e.y + e.height,
-                        size: 4,
-                        speed: e.type === 'boss' ? 400 : 200 + this.level * 5,
-                        color: '#ff00ea'
-                    });
-                }
-                e.lastFire = e.fireRate;
-            }
-        });
 
         if (edgeHit) {
+            this.swarmDirection *= -1;
             this.enemies.forEach(e => {
-                e.direction *= -1;
-                e.y += 30; // Move down
+                if (e.state === 'swarm' && !e.independent) {
+                    e.y += this.swarmDropAmount; // Drop down
+                }
             });
         }
+
+        // Enemies update
+        this.enemies.forEach(e => {
+            if (e.independent) {
+                e.x += e.speed * dt * e.direction;
+                if (e.x < this.offsetX || e.x + e.width > this.offsetX + this.gameWidth) {
+                    e.direction *= -1;
+                    e.x = Math.max(this.offsetX, Math.min(e.x, this.offsetX + this.gameWidth - e.width));
+                }
+            } else if (e.state === 'swarm') {
+                e.x += this.swarmSpeed * dt * this.swarmDirection;
+
+                // Kamikaze trigger
+                if (e.type === 'kamikaze' && Math.random() < 0.001) { // 0.1% chance per frame to dive
+                    e.state = 'diving';
+                    // Calculate dive trajectory towards player
+                    const dx = (this.player.x + this.player.width/2) - (e.x + e.width/2);
+                    const dy = (this.player.y + this.player.height/2) - (e.y + e.height/2);
+                    const dist = Math.sqrt(dx*dx + dy*dy);
+                    e.vx = (dx / dist) * 400; // Dive speed
+                    e.vy = (dy / dist) * 400;
+                }
+
+                // Phantom toggle
+                if (e.type === 'phantom') {
+                    e.timer -= dt;
+                    if (e.timer <= 0) {
+                        e.state = e.state === 'intangible' ? 'swarm' : 'intangible';
+                        e.timer = 2.0; // 2 seconds per state
+                        e.color = e.state === 'intangible' ? 'rgba(150, 0, 255, 0.2)' : 'rgba(150, 0, 255, 0.8)';
+                    }
+                }
+            } else if (e.state === 'diving') {
+                e.x += e.vx * dt;
+                e.y += e.vy * dt;
+            }
+
+            // Firing
+            if (e.state !== 'diving' && e.state !== 'intangible') {
+                e.lastFire -= dt;
+                if (e.lastFire <= 0) {
+                    // Only lower enemies should fire (simple approximation: randomly fire, boss always fires)
+                    if (Math.random() < 0.1 || e.type === 'boss') {
+                        this.enemyBullets.push({
+                            x: e.x + e.width / 2,
+                            y: e.y + e.height,
+                            size: e.type === 'boss' ? 6 : 4,
+                            speed: e.type === 'boss' ? 400 : 200 + this.level * 5,
+                            color: e.type === 'shield' ? '#ffaa00' : '#ff00ea'
+                        });
+                    }
+                    e.lastFire = e.fireRate;
+                }
+            }
+        });
 
         // Remove enemies that fall off the bottom of the screen
         // Also deduct life if they pass the player
@@ -405,7 +648,7 @@ class SpaceGame {
             this.generateLevel(this.level);
         }
 
-        this.checkCollisions();
+        this.checkCollisions(dt);
     }
 
     drawPlayer() {
@@ -470,7 +713,12 @@ class SpaceGame {
 
         this.ctx.textAlign = 'right';
         this.ctx.fillText(`Жизни: ${this.lives}`, this.canvas.width - 20, 20);
-        this.ctx.fillText(`Оружие: Ур.${this.player.weaponLevel}`, this.canvas.width - 20, 50);
+        let modText = 'Базовое';
+        if (this.player.weaponModifier === 'scatter') modText = 'Осколочное';
+        if (this.player.weaponModifier === 'piercing') modText = 'Пронзающее';
+        if (this.player.weaponModifier === 'orbital') modText = 'Сфера Затмения';
+        const levelText = this.player.weaponModifier !== 'normal' ? ` Ур.${this.player.modifierLevel}` : '';
+        this.ctx.fillText(`Оружие: ${modText}${levelText} ${this.player.modifierTimer > 0 ? Math.ceil(this.player.modifierTimer)+'с' : ''}`, this.canvas.width - 20, 50);
 
         // Controls guide
         this.ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
@@ -521,7 +769,33 @@ class SpaceGame {
 
         this.drawStars(this.ctx);
 
+        // Draw gameplay area boundaries (Pillarbox visual cue)
+        this.ctx.strokeStyle = 'rgba(255, 0, 60, 0.2)';
+        this.ctx.lineWidth = 2;
+        this.ctx.strokeRect(this.offsetX, this.offsetY, this.gameWidth, this.gameHeight);
+
         if (this.state === 'PLAYING') {
+            // Orbital Shield Render
+            if (this.player.weaponModifier === 'orbital') {
+                const level = this.player.modifierLevel;
+                const orbitalsCount = Math.min(4, level);
+                const radius = 40 + (level * 5);
+
+                this.ctx.fillStyle = '#00ffea';
+                this.ctx.shadowBlur = 20;
+                this.ctx.shadowColor = '#00ffea';
+
+                for (let o = 0; o < orbitalsCount; o++) {
+                    this.ctx.beginPath();
+                    const angle = (performance.now() / 200) + (o * (Math.PI * 2 / orbitalsCount));
+                    const ox = this.player.x + this.player.width/2 + Math.cos(angle) * radius;
+                    const oy = this.player.y + this.player.height/2 + Math.sin(angle) * radius;
+                    this.ctx.arc(ox, oy, 10, 0, Math.PI * 2);
+                    this.ctx.fill();
+                }
+                this.ctx.shadowBlur = 0;
+            }
+
             this.drawPlayer();
 
             // Bullets
@@ -560,15 +834,48 @@ class SpaceGame {
             });
             this.ctx.shadowBlur = 0;
 
+            // Obelisks
+            this.obelisks.forEach(o => {
+                this.ctx.fillStyle = o.color;
+                this.ctx.globalAlpha = Math.max(0.2, o.hp / 15); // Fade as damaged
+                // Draw jagged obelisk shape
+                this.ctx.beginPath();
+                this.ctx.moveTo(o.x, o.y + o.height);
+                this.ctx.lineTo(o.x + o.width/2, o.y);
+                this.ctx.lineTo(o.x + o.width, o.y + o.height);
+                this.ctx.closePath();
+                this.ctx.fill();
+                this.ctx.globalAlpha = 1.0;
+            });
+
             // Enemies
             this.enemies.forEach(e => {
                 this.ctx.fillStyle = e.color;
-                this.ctx.shadowBlur = 15;
+                this.ctx.shadowBlur = e.state === 'intangible' ? 0 : 15;
                 this.ctx.shadowColor = e.color;
-                this.ctx.fillRect(e.x, e.y, e.width, e.height);
-                // Inner eye/core
-                this.ctx.fillStyle = '#fff';
-                this.ctx.fillRect(e.x + e.width/2 - 2, e.y + e.height/2 - 2, e.type==='boss'?20:4, e.type==='boss'?20:4);
+
+                if (e.type === 'shield') {
+                    // Draw shield shape
+                    this.ctx.fillRect(e.x, e.y, e.width, e.height * 0.7);
+                    this.ctx.fillStyle = '#fff';
+                    this.ctx.fillRect(e.x, e.y + e.height * 0.7, e.width, e.height * 0.3); // Bright shield front
+                } else if (e.type === 'kamikaze') {
+                    // Triangle shape
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(e.x + e.width/2, e.y + e.height);
+                    this.ctx.lineTo(e.x, e.y);
+                    this.ctx.lineTo(e.x + e.width, e.y);
+                    this.ctx.closePath();
+                    this.ctx.fill();
+                } else {
+                    this.ctx.fillRect(e.x, e.y, e.width, e.height);
+                }
+
+                // Inner eye/core (skip for phantoms when intangible)
+                if (e.state !== 'intangible') {
+                    this.ctx.fillStyle = '#fff';
+                    this.ctx.fillRect(e.x + e.width/2 - 2, e.y + e.height/2 - 2, e.type==='boss'?20:4, e.type==='boss'?20:4);
+                }
             });
             this.ctx.shadowBlur = 0;
 

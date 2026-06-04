@@ -888,6 +888,13 @@
                     audio.playbackRate = 0.5; // slow down music during dive
                 }
 
+                // High-Res Render for Dive
+                const pr = window.devicePixelRatio || 1;
+                renderer.setPixelRatio(pr);
+                renderer.setSize(window.innerWidth, window.innerHeight, false);
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+
                 // Fullscreen transition
                 renderer.domElement.style.position = 'fixed';
                 renderer.domElement.style.top = '50%';
@@ -949,6 +956,11 @@
                     renderer.domElement.style.width = '300px';
                     renderer.domElement.style.height = '300px';
                     renderer.domElement.style.objectFit = 'fill';
+
+                    // Reset Render Size
+                    renderer.setSize(300, 300, false);
+                    camera.aspect = 1;
+                    camera.updateProjectionMatrix();
 
                     const game = new SpaceGame(currentUser);
                     game.start();
