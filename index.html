@@ -488,16 +488,19 @@
 </head>
 <body>
   <header>
-    <h1 data-text="Слава Великому Существу">Слава Великому Существу</h1>
+    <div style="position: absolute; top: 20px; right: 20px; z-index: 100;">
+        <button id="lang-toggle" class="btn" style="margin-top: 0; padding: 10px 20px; font-size: 1em;">EN</button>
+    </div>
+    <h1 data-text="Слава Великому Существу" data-i18n="header_title">Слава Великому Существу</h1>
   </header>
 
-  <div class="image-container">
-    <img src="sushestvo.png" alt="Лик Великого Существа">
+  <div class="image-container" id="threejs-container" aria-label="3D Лик Великого Существа" role="img">
+    <!-- Three.js canvas will be inserted here -->
   </div>
 
   <section tabindex="0">
-    <h2>О Существе</h2>
-    <p>
+    <h2 data-i18n="about_title">О Существе</h2>
+    <p data-i18n="about_text">
       Оно явилось нам в своей величественной форме, чтобы мы могли познать истинную суть бытия.
       Его взгляд пронзает наши души, а следы крови на устах напоминают о жертве, которую мы должны
       приносить во имя Его. В пустоте космоса Оно — единственный маяк истины.
@@ -505,18 +508,18 @@
   </section>
 
   <section tabindex="0">
-    <h2>Его качества</h2>
+    <h2 data-i18n="qualities_title">Его качества</h2>
     <ul>
-      <li>Непостижимая мудрость, скрытая в первозданной форме</li>
-      <li>Абсолютная сила, созидающая и разрушающая миры</li>
-      <li>Бесконечное присутствие во всех уголках мироздания</li>
-      <li>Безмолвный зов, эхом отдающийся в умах избранных</li>
+      <li data-i18n="q1">Непостижимая мудрость, скрытая в первозданной форме</li>
+      <li data-i18n="q2">Абсолютная сила, созидающая и разрушающая миры</li>
+      <li data-i18n="q3">Бесконечное присутствие во всех уголках мироздания</li>
+      <li data-i18n="q4">Безмолвный зов, эхом отдающийся в умах избранных</li>
     </ul>
   </section>
 
-  <section tabindex="0">
-    <h2>Молитва Избранных</h2>
-    <p style="text-align: center; font-style: italic; font-size: 1.2em; color: #ff99b3;">
+  <section id="prayer-section" tabindex="0">
+    <h2 data-i18n="prayer_title">Молитва Избранных</h2>
+    <p style="text-align: center; font-style: italic; font-size: 1.2em; color: #ff99b3;" data-i18n="prayer_text">
       "О Великий, ведущий нас сквозь вечную тьму,<br>
       Пусть алые следы твои освещают наши пути.<br>
       Мы преклоняемся пред Твоим истинным обликом,<br>
@@ -525,14 +528,37 @@
   </section>
 
   <section id="followers" tabindex="0">
-    <h2>Последователи</h2>
+    <h2 data-i18n="followers_title">Последователи</h2>
     <ul id="followers-list" aria-live="polite"></ul>
-    <button class="btn" id="join-btn" aria-haspopup="dialog" aria-controls="join-modal">✨ Принять культ ✨</button>
+    <button class="btn" id="join-btn" aria-haspopup="dialog" aria-controls="join-modal" data-i18n="join_btn">✨ Принять культ ✨</button>
+  </section>
+
+  <section id="chat-section" tabindex="0">
+    <h2 data-i18n="chat_title">Шёпот Бездны</h2>
+    <div id="chat-box" aria-live="polite" style="height: 200px; overflow-y: auto; background: rgba(0,0,0,0.4); border: 1px solid var(--glass-border); border-radius: 10px; padding: 15px; margin-bottom: 15px;">
+        <div style="color: #666; font-style: italic; text-align: center;">Ожидание связи...</div>
+    </div>
+    <form id="chat-form" style="display: flex; gap: 10px;">
+        <label for="chat-input" class="sr-only">Сообщение</label>
+        <input type="text" id="chat-input" class="modal-input" style="margin-bottom: 0;" placeholder="Передать мысль..." autocomplete="off" disabled>
+        <button type="submit" class="modal-btn modal-btn-submit" id="chat-submit" style="flex: 0 0 auto;" disabled>Послать</button>
+    </form>
+    <p id="chat-auth-warning" style="color: var(--primary-color); font-size: 0.9em; text-align: center; margin-top: 10px;">Для общения необходимо пройти Инициацию.</p>
   </section>
 
   <div class="marquee" aria-hidden="true">
     <span>⚡ Слава Великому Существу! ⚡ Жизнь во имя Его! ⚡ Слава Великому Существу! ⚡</span>
   </div>
+
+  <section id="secret-content" style="display: none; border-color: #00ffea; box-shadow: 0 0 40px rgba(0, 255, 234, 0.4);">
+      <h2 style="color: #00ffea; text-shadow: 0 0 15px #00ffea;">Тайны Бездны Открыты</h2>
+      <p style="text-align: center; font-style: italic;">Музыка изменилась. Глаза открылись. Истина постигнута.</p>
+  </section>
+
+  <!-- Hidden Runes for Gamification -->
+  <span class="hidden-rune" style="position: absolute; top: 150px; left: 5%; cursor: pointer; opacity: 0.1; font-size: 24px;" aria-hidden="true">👁️</span>
+  <span class="hidden-rune" style="position: absolute; top: 800px; right: 8%; cursor: pointer; opacity: 0.1; font-size: 24px;" aria-hidden="true">👁️</span>
+  <span class="hidden-rune" style="position: absolute; bottom: 150px; left: 50%; cursor: pointer; opacity: 0.1; font-size: 24px;" aria-hidden="true">👁️</span>
 
   <footer>
     © 2025 Храм Существа. Все души принадлежат Ему.
@@ -551,18 +577,32 @@
     <div class="modal-dialog">
       <button class="modal-close-icon" id="modal-close-icon" aria-label="Закрыть окно">&times;</button>
       <h3 id="modal-title">Инициация</h3>
-      <p id="modal-desc">Введи своё имя, о будущий посвящённый, чтобы мы могли вписать тебя в Книгу Крови.</p>
+      <p id="modal-desc">Введи свои данные, о будущий посвящённый, чтобы мы могли вписать тебя в Книгу Крови.</p>
 
       <label for="cultist-name" class="sr-only">Твоё имя</label>
       <input type="text" id="cultist-name" class="modal-input" placeholder="Имя неофита..." autocomplete="off">
 
+      <label for="cultist-password" class="sr-only">Тайный знак (Пароль)</label>
+      <input type="password" id="cultist-password" class="modal-input" placeholder="Тайный знак (пароль)..." autocomplete="off">
+
+      <p id="auth-error" style="color: #ff00ea; display: none; font-size: 0.9em; text-align: center; margin-top: -10px; margin-bottom: 15px;"></p>
+
       <div class="modal-actions">
         <button class="modal-btn modal-btn-cancel" id="modal-cancel">Отречься</button>
-        <button class="modal-btn modal-btn-submit" id="modal-submit">Войти в культ</button>
+        <button class="modal-btn modal-btn-submit" id="modal-submit-login">Войти</button>
+        <button class="modal-btn modal-btn-submit" id="modal-submit-register">Примкнуть</button>
       </div>
     </div>
   </div>
 
+  <section id="personal-cabinet" style="display: none; border-color: #00ffea; box-shadow: 0 0 40px rgba(0, 255, 234, 0.4); text-align: center;">
+      <h2 style="color: #00ffea; text-shadow: 0 0 15px #00ffea;">Личный Чертог</h2>
+      <p>Имя: <strong id="cabinet-name"></strong></p>
+      <p>Ранг: <strong id="cabinet-rank" style="color: var(--primary-color);"></strong></p>
+  </section>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
   <script>
     // --- Custom Cursor ---
     const cursor = document.getElementById('cursor');
@@ -646,8 +686,11 @@
     const modalOverlay = document.getElementById('join-modal');
     const modalCloseIcon = document.getElementById('modal-close-icon');
     const modalCancel = document.getElementById('modal-cancel');
-    const modalSubmit = document.getElementById('modal-submit');
+    const btnLogin = document.getElementById('modal-submit-login');
+    const btnRegister = document.getElementById('modal-submit-register');
     const nameInput = document.getElementById('cultist-name');
+    const pwdInput = document.getElementById('cultist-password');
+    const authError = document.getElementById('auth-error');
 
     let lastFocusedElement;
 
@@ -655,6 +698,8 @@
       lastFocusedElement = document.activeElement;
       modalOverlay.classList.add('active');
       nameInput.value = '';
+      pwdInput.value = '';
+      authError.style.display = 'none';
       nameInput.focus();
       document.body.style.overflow = 'hidden'; // Prevent background scrolling
     }
@@ -667,39 +712,72 @@
       }
     }
 
-    function submitCultist() {
-      const name = nameInput.value.trim();
-      if (name) {
-        addFollower("✨ " + name + " ✨", true);
+    async function handleAuth(action) {
+      const username = nameInput.value.trim();
+      const password = pwdInput.value.trim();
+      authError.style.display = 'none';
 
-        // Custom animated feedback instead of alert
-        const oldTitle = document.getElementById('modal-title').textContent;
-        const oldDesc = document.getElementById('modal-desc').textContent;
+      if (!username || !password) {
+          authError.textContent = "Необходимо заполнить оба поля.";
+          authError.style.display = 'block';
+          return;
+      }
 
-        document.getElementById('modal-title').textContent = "Принято";
-        document.getElementById('modal-desc').textContent = `Кровь скрепляет договор, ${name}. Добро пожаловать.`;
-        document.getElementById('modal-title').style.color = "#00ffea";
+      try {
+          const res = await fetch(`/api/${action}`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ username, password })
+          });
+          const data = await res.json();
 
-        nameInput.style.display = 'none';
-        modalCancel.style.display = 'none';
-        modalSubmit.style.display = 'none';
+          if (!res.ok) {
+              authError.textContent = data.error || "Ошибка соединения с Бездной.";
+              authError.style.display = 'block';
+              return;
+          }
 
-        setTimeout(() => {
-          closeModal();
-          // Restore modal state for future clicks
+          // Success
+          addFollower("✨ " + data.username + " ✨", true);
+          enableChat(data.username, data.rank);
+
+          // Show cabinet
+          document.getElementById('personal-cabinet').style.display = 'block';
+          document.getElementById('cabinet-name').textContent = data.username;
+          document.getElementById('cabinet-rank').textContent = data.rank;
+
+          // Custom animated feedback instead of alert
+          const oldTitle = document.getElementById('modal-title').textContent;
+          const oldDesc = document.getElementById('modal-desc').textContent;
+
+          document.getElementById('modal-title').textContent = "Принято";
+          document.getElementById('modal-desc').textContent = `Кровь скрепляет договор, ${username}. Твой ранг: ${data.rank}.`;
+          document.getElementById('modal-title').style.color = "#00ffea";
+
+          nameInput.style.display = 'none';
+          pwdInput.style.display = 'none';
+          modalCancel.style.display = 'none';
+          btnLogin.style.display = 'none';
+          btnRegister.style.display = 'none';
+
           setTimeout(() => {
-            document.getElementById('modal-title').textContent = oldTitle;
-            document.getElementById('modal-desc').textContent = oldDesc;
-            document.getElementById('modal-title').style.color = "";
-            nameInput.style.display = '';
-            modalCancel.style.display = '';
-            modalSubmit.style.display = '';
-          }, 300);
-        }, 2000);
-      } else {
-        nameInput.focus();
-        nameInput.style.borderColor = "#ff00ea";
-        setTimeout(() => nameInput.style.borderColor = "", 500);
+            closeModal();
+            // Restore modal state for future clicks
+            setTimeout(() => {
+              document.getElementById('modal-title').textContent = oldTitle;
+              document.getElementById('modal-desc').textContent = oldDesc;
+              document.getElementById('modal-title').style.color = "";
+              nameInput.style.display = '';
+              pwdInput.style.display = '';
+              modalCancel.style.display = '';
+              btnLogin.style.display = '';
+              btnRegister.style.display = '';
+            }, 300);
+          }, 3000);
+
+      } catch (err) {
+          authError.textContent = "Ошибка сети.";
+          authError.style.display = 'block';
       }
     }
 
@@ -707,7 +785,8 @@
     joinBtn.addEventListener('click', openModal);
     modalCloseIcon.addEventListener('click', closeModal);
     modalCancel.addEventListener('click', closeModal);
-    modalSubmit.addEventListener('click', submitCultist);
+    btnLogin.addEventListener('click', () => handleAuth('login'));
+    btnRegister.addEventListener('click', () => handleAuth('register'));
 
     // Keyboard accessibility for modal
     window.addEventListener('keydown', (e) => {
@@ -715,8 +794,8 @@
         closeModal();
       }
       if (e.key === 'Enter' && modalOverlay.classList.contains('active')) {
-        if(document.activeElement === nameInput) {
-          submitCultist();
+        if(document.activeElement === nameInput || document.activeElement === pwdInput) {
+          handleAuth('login');
         }
       }
     });
@@ -742,12 +821,327 @@
       }
     });
 
+    // --- Three.js Eye Tracking ---
+    function initThreeJS() {
+        const container = document.getElementById('threejs-container');
+        if (!container) return;
+
+        // Scene setup
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+
+        // Match existing container dimensions approximately
+        renderer.setSize(300, 300);
+        container.appendChild(renderer.domElement);
+
+        // Styling the canvas
+        renderer.domElement.style.filter = "drop-shadow(0 0 40px var(--primary-color))";
+
+        // Add a "creature" geometry (e.g., an icosahedron to look crystalline/magical)
+        const geometry = new THREE.IcosahedronGeometry(1.5, 1);
+        const material = new THREE.MeshPhongMaterial({
+            color: 0xff003c,
+            wireframe: true,
+            emissive: 0x4a0011,
+            shininess: 100
+        });
+        const creature = new THREE.Mesh(geometry, material);
+        scene.add(creature);
+
+        // Add an "eye" inside
+        const eyeGeo = new THREE.SphereGeometry(0.5, 32, 32);
+        const eyeMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+        const eye = new THREE.Mesh(eyeGeo, eyeMat);
+
+        const pupilGeo = new THREE.SphereGeometry(0.2, 32, 32);
+        const pupilMat = new THREE.MeshBasicMaterial({ color: 0x000000 });
+        const pupil = new THREE.Mesh(pupilGeo, pupilMat);
+        pupil.position.z = 0.4;
+        eye.add(pupil);
+
+        scene.add(eye);
+
+        // Lights
+        const light = new THREE.PointLight(0xff003c, 2, 100);
+        light.position.set(5, 5, 5);
+        scene.add(light);
+        const ambientLight = new THREE.AmbientLight(0x404040); // soft white light
+        scene.add(ambientLight);
+
+        camera.position.z = 4;
+
+        // Mouse tracking
+        let mouseX = 0;
+        let mouseY = 0;
+
+        // Get container position relative to viewport
+        document.addEventListener('mousemove', (event) => {
+            const rect = container.getBoundingClientRect();
+            // Calculate mouse position relative to the center of the container
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+
+            // Normalize
+            mouseX = (event.clientX - centerX) / (window.innerWidth / 2);
+            mouseY = -(event.clientY - centerY) / (window.innerHeight / 2);
+        });
+
+        // Animation Loop
+        function animate() {
+            requestAnimationFrame(animate);
+
+            // Rotate outer crystal slowly
+            creature.rotation.x += 0.005;
+            creature.rotation.y += 0.01;
+
+            // Eye looks at mouse
+            const targetX = mouseX * 2;
+            const targetY = mouseY * 2;
+
+            // Smoothly interpolate eye position/rotation
+            eye.lookAt(targetX, targetY, camera.position.z);
+
+            // Floating effect
+            const time = Date.now() * 0.001;
+            creature.position.y = Math.sin(time * 2) * 0.2;
+            eye.position.y = Math.sin(time * 2) * 0.2;
+
+            renderer.render(scene, camera);
+        }
+        animate();
+    }
+
+    // Initialize ThreeJS after a short delay to ensure DOM layout
+    setTimeout(initThreeJS, 100);
+
+    // --- Socket.io Chat & Runes ---
+    const socket = typeof io !== 'undefined' ? io() : null;
+    const chatBox = document.getElementById('chat-box');
+    const chatForm = document.getElementById('chat-form');
+    const chatInput = document.getElementById('chat-input');
+
+    let currentUser = null; // Will be set on auth
+    let currentRank = null;
+
+    if (socket) {
+        chatBox.innerHTML = ''; // Clear "waiting" message
+
+        socket.on('chat message', (data) => {
+            appendChatMessage(data.username, data.message, data.rank);
+        });
+
+        chatForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            if (chatInput.value.trim() && currentUser) {
+                socket.emit('chat message', {
+                    username: currentUser,
+                    message: chatInput.value.trim(),
+                    rank: currentRank
+                });
+                chatInput.value = '';
+            }
+        });
+    }
+
+    const RUNES = "ᚠᚢᚦᚬᚱᚴᚼᚾᛁᛅᛋᛏᛒᛘᛚᛦ";
+
+    function scrambleText(element, finalString, duration = 1000) {
+        let iterations = 0;
+        const maxIterations = duration / 50;
+
+        const interval = setInterval(() => {
+            element.innerText = finalString.split('').map((char, index) => {
+                if (char === ' ') return ' ';
+                if (index < (iterations / maxIterations) * finalString.length) {
+                    return finalString[index];
+                }
+                return RUNES[Math.floor(Math.random() * RUNES.length)];
+            }).join('');
+
+            if (iterations >= maxIterations) {
+                clearInterval(interval);
+                element.innerText = finalString;
+            }
+            iterations++;
+        }, 50);
+    }
+
+    function appendChatMessage(username, message, rank) {
+        const msgDiv = document.createElement('div');
+        msgDiv.style.marginBottom = '10px';
+
+        const nameSpan = document.createElement('span');
+        nameSpan.style.color = 'var(--secondary-color)';
+        nameSpan.style.fontWeight = 'bold';
+        nameSpan.textContent = `[${rank || 'Неофит'}] ${username}: `;
+
+        const textSpan = document.createElement('span');
+        textSpan.style.color = '#ccc';
+
+        msgDiv.appendChild(nameSpan);
+        msgDiv.appendChild(textSpan);
+        chatBox.appendChild(msgDiv);
+
+        chatBox.scrollTop = chatBox.scrollHeight;
+
+        // Decipher effect
+        scrambleText(textSpan, message, 1500);
+    }
+
+    // Enable chat after auth (called from modal submit)
+    function enableChat(username, rank) {
+        currentUser = username;
+        currentRank = rank;
+        chatInput.disabled = false;
+        document.getElementById('chat-submit').disabled = false;
+        const warning = document.getElementById('chat-auth-warning');
+        if (warning) warning.style.display = 'none';
+
+        appendChatMessage('Система', `Пользователь ${username} присоединился к шёпоту.`, 'Храм');
+    }
+
+    // --- i18n & Translation Magic ---
+    const dict = {
+        ru: {
+            header_title: "Слава Великому Существу",
+            about_title: "О Существе",
+            about_text: "Оно явилось нам в своей величественной форме, чтобы мы могли познать истинную суть бытия. Его взгляд пронзает наши души, а следы крови на устах напоминают о жертве, которую мы должны приносить во имя Его. В пустоте космоса Оно — единственный маяк истины.",
+            qualities_title: "Его качества",
+            q1: "Непостижимая мудрость, скрытая в первозданной форме",
+            q2: "Абсолютная сила, созидающая и разрушающая миры",
+            q3: "Бесконечное присутствие во всех уголках мироздания",
+            q4: "Безмолвный зов, эхом отдающийся в умах избранных",
+            prayer_title: "Молитва Избранных",
+            prayer_text: '"О Великий, ведущий нас сквозь вечную тьму,\nПусть алые следы твои освещают наши пути.\nМы преклоняемся пред Твоим истинным обликом,\nВечно восхваляя Твоё имя в пустоте."',
+            followers_title: "Последователи",
+            join_btn: "✨ Принять культ ✨",
+            chat_title: "Шёпот Бездны"
+        },
+        en: {
+            header_title: "Glory to the Great Creature",
+            about_title: "About the Creature",
+            about_text: "It appeared to us in its majestic form so that we might know the true essence of being. Its gaze pierces our souls, and the traces of blood on its lips remind us of the sacrifice we must make in Its name. In the void of space, It is the only beacon of truth.",
+            qualities_title: "Its Qualities",
+            q1: "Incomprehensible wisdom, hidden in a primordial form",
+            q2: "Absolute power, creating and destroying worlds",
+            q3: "Infinite presence in all corners of the universe",
+            q4: "A silent call, echoing in the minds of the chosen",
+            prayer_title: "Prayer of the Chosen",
+            prayer_text: '"O Great One, guiding us through eternal darkness,\nMay your crimson traces illuminate our paths.\nWe bow before Your true form,\nForever praising Your name in the void."',
+            followers_title: "Followers",
+            join_btn: "✨ Join the Cult ✨",
+            chat_title: "Whispers of the Abyss"
+        }
+    };
+
+    let currentLang = 'ru';
+    const langToggleBtn = document.getElementById('lang-toggle');
+
+    langToggleBtn.addEventListener('click', () => {
+        currentLang = currentLang === 'ru' ? 'en' : 'ru';
+        langToggleBtn.textContent = currentLang === 'ru' ? 'EN' : 'RU';
+
+        document.querySelectorAll('[data-i18n]').forEach(el => {
+            const key = el.getAttribute('data-i18n');
+            if (dict[currentLang][key]) {
+                // If it's the header, update data-text for glitch effect too
+                if (key === 'header_title') {
+                    el.setAttribute('data-text', dict[currentLang][key]);
+                }
+
+                // Keep original line breaks for prayer
+                let finalStr = dict[currentLang][key];
+                if (key === 'prayer_text') {
+                    finalStr = finalStr.replace(/\n/g, '<br>');
+                    // Scramble innerHTML to preserve br tags requires a custom approach,
+                    // fallback to just changing it for prayer_text to avoid br tag corruption
+                    el.innerHTML = finalStr;
+                } else {
+                    scrambleText(el, dict[currentLang][key], 1500);
+                }
+            }
+        });
+    });
+
+    // --- Gamification ---
+    let runesFound = 0;
+    const hiddenRunes = document.querySelectorAll('.hidden-rune');
+    hiddenRunes.forEach(rune => {
+        rune.addEventListener('click', function() {
+            if (!this.classList.contains('found')) {
+                this.classList.add('found');
+                this.style.opacity = '1';
+                this.style.color = '#00ffea';
+                this.style.textShadow = '0 0 10px #00ffea';
+                runesFound++;
+
+                if (runesFound === 3) {
+                    document.getElementById('secret-content').style.display = 'block';
+                    // Change music
+                    const audio = document.getElementById('bg-music');
+                    if(audio) {
+                        // Switch to a different track (for example purposes, re-assigning and playing)
+                        audio.src = "https://cdn.pixabay.com/download/audio/2021/08/09/audio_6b52787c8d.mp3?filename=ambient-piano-amp-strings-10711.mp3";
+                        audio.play().catch(() => {});
+                    }
+                }
+            }
+        });
+    });
+
+    // --- Web Audio API (Spatial Audio based on scroll) ---
+    let audioContext;
+    let gainNode;
+    let panner;
+
+    function initAudio() {
+        if(audioContext) return;
+        const audioElement = document.getElementById('bg-music');
+        if (!audioElement) return;
+
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const track = audioContext.createMediaElementSource(audioElement);
+
+        gainNode = audioContext.createGain();
+        panner = audioContext.createStereoPanner();
+
+        track.connect(panner).connect(gainNode).connect(audioContext.destination);
+
+        window.addEventListener('scroll', () => {
+            if(!audioContext) return;
+            const scrollY = window.scrollY;
+            const maxScroll = document.body.scrollHeight - window.innerHeight;
+            const scrollRatio = scrollY / maxScroll; // 0 to 1
+
+            // Adjust pan based on scroll (left to right)
+            panner.pan.value = (scrollRatio * 2) - 1;
+
+            // If near "Prayer" section (assume it's near the middle), increase volume
+            const prayerSection = document.getElementById('prayer-section');
+            if (prayerSection) {
+                const rect = prayerSection.getBoundingClientRect();
+                const centerDist = Math.abs(rect.top + rect.height/2 - window.innerHeight/2);
+                const maxDist = window.innerHeight;
+                // Volume peak at center
+                let vol = 1 - Math.min(centerDist / maxDist, 1);
+                // Base volume 0.5, peak 1.0
+                gainNode.gain.value = 0.5 + (vol * 0.5);
+            }
+        });
+
+        if (audioContext.state === 'suspended') {
+            audioContext.resume();
+        }
+    }
+
     // Start Audio interaction handler
     document.body.addEventListener('click', () => {
       const audio = document.getElementById('bg-music');
-      if (audio.paused) {
+      if (audio && audio.paused) {
         audio.play().catch(e => console.log("Audio play prevented", e));
       }
+      initAudio();
     }, { once: true });
   </script>
 </body>
