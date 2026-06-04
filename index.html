@@ -878,6 +878,24 @@
         let mouseX = 0;
         let mouseY = 0;
 
+        let isDiving = false;
+
+        renderer.domElement.addEventListener('click', () => {
+            if (currentUser && !isDiving) {
+                isDiving = true;
+                const audio = document.getElementById('bg-music');
+                if (audio) {
+                    audio.playbackRate = 0.5; // slow down music during dive
+                }
+            } else if (!currentUser) {
+                // Optional: visual feedback if not initiated
+                renderer.domElement.style.filter = "drop-shadow(0 0 40px #ff00ea)";
+                setTimeout(() => {
+                    renderer.domElement.style.filter = "drop-shadow(0 0 40px var(--primary-color))";
+                }, 500);
+            }
+        });
+
         // Get container position relative to viewport
         document.addEventListener('mousemove', (event) => {
             const rect = container.getBoundingClientRect();
@@ -898,17 +916,37 @@
             creature.rotation.x += 0.005;
             creature.rotation.y += 0.01;
 
-            // Eye looks at mouse
-            const targetX = mouseX * 2;
-            const targetY = mouseY * 2;
+            if (isDiving) {
+                camera.position.z -= 0.05;
+                creature.rotation.x += 0.05;
+                creature.rotation.y += 0.1;
 
-            // Smoothly interpolate eye position/rotation
-            eye.lookAt(targetX, targetY, camera.position.z);
+                if (camera.position.z <= 0.5) {
+                    isDiving = false;
+                    camera.position.z = 4; // reset for when game closes
+                    const audio = document.getElementById('bg-music');
+                    if (audio) audio.playbackRate = 1.0;
 
-            // Floating effect
-            const time = Date.now() * 0.001;
-            creature.position.y = Math.sin(time * 2) * 0.2;
-            eye.position.y = Math.sin(time * 2) * 0.2;
+                    const game = new SpaceGame(currentUser);
+                    game.start();
+                }
+            } else {
+                // Rotate outer crystal slowly
+                creature.rotation.x += 0.005;
+                creature.rotation.y += 0.01;
+
+                // Eye looks at mouse
+                const targetX = mouseX * 2;
+                const targetY = mouseY * 2;
+
+                // Smoothly interpolate eye position/rotation
+                eye.lookAt(targetX, targetY, camera.position.z);
+
+                // Floating effect
+                const time = Date.now() * 0.001;
+                creature.position.y = Math.sin(time * 2) * 0.2;
+                eye.position.y = Math.sin(time * 2) * 0.2;
+            }
 
             renderer.render(scene, camera);
         }
@@ -1224,5 +1262,6 @@
       initAudio();
     }, { once: true });
   </script>
+  <script src="game.js"></script>
 </body>
 </html>

@@ -34,6 +34,9 @@ function determineRank() {
     return RANKS[0]; // Неофит (50%)
 }
 
+// --- Game Data ---
+let scores = []; // Array of { username, score }
+
 // --- Auth Endpoints ---
 app.post('/api/register', (req, res) => {
     const { username, password } = req.body;
@@ -55,6 +58,31 @@ app.post('/api/login', (req, res) => {
         return res.status(401).json({ error: 'Invalid credentials.' });
     }
     res.json({ message: 'Login successful', username, rank: user.rank });
+});
+
+// --- Game Endpoints ---
+app.post('/api/score', (req, res) => {
+    const { username, score } = req.body;
+    if (!username || typeof score !== 'number') {
+        return res.status(400).json({ error: 'Username and numeric score required.' });
+    }
+
+    // Add new score
+    scores.push({ username, score });
+
+    // Sort descending by score
+    scores.sort((a, b) => b.score - a.score);
+
+    // Keep only top 100 to avoid memory leak, top 10 returned
+    if (scores.length > 100) {
+        scores = scores.slice(0, 100);
+    }
+
+    res.json({ message: 'Score saved successfully.' });
+});
+
+app.get('/api/leaderboard', (req, res) => {
+    res.json({ leaderboard: scores.slice(0, 10) }); // Return top 10
 });
 
 // --- Socket.io Chat ---
