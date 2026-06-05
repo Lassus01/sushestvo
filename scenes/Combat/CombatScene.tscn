@@ -1,6 +1,7 @@
 [gd_scene load_steps=3 format=3 uid="uid://ccb2n0n814"]
 
 [ext_resource type="PackedScene" uid="uid://bcb1n0n813" path="res://scenes/Combat/BoardController.tscn" id="1_clt1"]
+[ext_resource type="Script" path="res://scenes/Combat/HandContainer.gd" id="2_hand_script"]
 
 [sub_resource type="Environment" id="Environment_1"]
 background_mode = 3
@@ -56,6 +57,7 @@ layout_mode = 2
 [node name="PlayerUI" type="CanvasLayer" parent="."]
 
 [node name="HandContainer" type="HBoxContainer" parent="PlayerUI"]
+script = ExtResource("2_hand_script")
 anchors_preset = 7
 anchor_left = 0.5
 anchor_top = 1.0
