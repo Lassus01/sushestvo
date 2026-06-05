@@ -1,8 +1,15 @@
 [gd_scene load_steps=2 format=3 uid="uid://df7k3m9"]
 
 [ext_resource type="Script" path="res://src/CardVisual.gd" id="1_a2b3"]
+[ext_resource type="Shader" path="res://src/GlitchShader.gdshader" id="2_glitch"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_1"]
+shader = ExtResource("2_glitch")
+shader_parameter/amount = 0.05
+shader_parameter/time_speed = 2.0
 
 [node name="CardVisual" type="Control"]
+material = SubResource("ShaderMaterial_1")
 custom_minimum_size = Vector2(100, 150)
 layout_mode = 3
 anchors_preset = 0

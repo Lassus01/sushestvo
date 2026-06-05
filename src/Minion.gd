@@ -27,11 +27,25 @@ func prepare_for_turn():
 func take_damage(amount: int):
 	health -= amount
 	update_ui()
+
+	# Shake animation
+	if is_inside_tree():
+		var tween = create_tween()
+		var original_pos = position
+		tween.tween_property(self, "position", original_pos + Vector2(10, 0), 0.05)
+		tween.tween_property(self, "position", original_pos - Vector2(10, 0), 0.05)
+		tween.tween_property(self, "position", original_pos, 0.05)
+
 	if health <= 0:
 		die()
 
 func die():
-	queue_free()
+	if is_inside_tree():
+		var tween = create_tween()
+		tween.tween_property(self, "modulate:a", 0.0, 0.3)
+		tween.tween_callback(queue_free)
+	else:
+		queue_free()
 
 func update_ui():
 	if name_label: name_label.text = minion_name

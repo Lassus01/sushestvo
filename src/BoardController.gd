@@ -68,6 +68,15 @@ func play_card(card_data, is_player: bool) -> void:
 		enemy_minions.append(minion_node)
 		enemy_minions_container.add_child(minion_node)
 
+	# Tween flying animation from center to board
+	if is_inside_tree():
+		var final_pos = minion_node.position
+		minion_node.position = Vector2(0, 300) # Assuming from deck bottom
+		minion_node.modulate.a = 0
+		var tween = create_tween()
+		tween.tween_property(minion_node, "position", final_pos, 0.3).set_trans(Tween.TRANS_QUAD)
+		tween.parallel().tween_property(minion_node, "modulate:a", 1.0, 0.2)
+
 	_update_ui()
 
 # Автоматическая фаза боя Artifact-style (соседи бьют соседей)
@@ -104,6 +113,15 @@ func take_altar_damage(amount: int, is_player_altar: bool) -> void:
 		enemy_altar_health -= amount
 		if enemy_altar_health <= 0:
 			emit_signal("altar_destroyed", false)
+
+	# Shake effect
+	if is_inside_tree():
+		var tween = create_tween()
+		var original_pos = position
+		tween.tween_property(self, "position", original_pos + Vector2(15, 0), 0.05)
+		tween.tween_property(self, "position", original_pos - Vector2(15, 0), 0.05)
+		tween.tween_property(self, "position", original_pos, 0.05)
+
 	_update_ui()
 
 func _cleanup_dead_minions() -> void:
