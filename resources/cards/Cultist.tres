@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="CardResource" load_steps=2 format=3 uid="uid://cxab35g"]
+
+[ext_resource type="Script" path="res://src/CardResource.gd" id="1_1"]
+
+[resource]
+script = ExtResource("1_1")
+card_name = "Cultist"
+blood_cost = 1
+attack = 2
+health = 1
+traits = Array[String]([])

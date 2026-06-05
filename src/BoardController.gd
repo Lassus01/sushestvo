@@ -43,29 +43,30 @@ func start_turn(is_player: bool) -> void:
 			minion.prepare_for_turn()
 	_update_ui()
 
-func can_play_card(card_data: Dictionary, is_player: bool) -> bool:
+func can_play_card(card_data, is_player: bool) -> bool:
 	if is_player:
-		if current_mana < card_data.cost:
+		if current_mana < card_data.blood_cost:
 			return false
 		if player_minions.size() >= max_minions:
 			return false
 	return true
 
-func play_card(card_data: Dictionary, is_player: bool) -> void:
+func play_card(card_data, is_player: bool) -> void:
 	if not can_play_card(card_data, is_player):
 		return
 
 	if is_player:
-		current_mana -= card_data.cost
+		current_mana -= card_data.blood_cost
 
-	# Инстанцируем визуальный узел карты (заглушка)
-	# var minion_node = preload("res://scenes/Combat/Minion.tscn").instantiate()
-	# minion_node.setup(card_data)
+	var minion_node = preload("res://scenes/Combat/Minion.tscn").instantiate()
+	minion_node.setup(card_data)
 
-	# Заглушка для добавления логического узла
-	# if is_player:
-	# 	player_minions.append(minion_node)
-	# 	player_minions_container.add_child(minion_node)
+	if is_player:
+		player_minions.append(minion_node)
+		player_minions_container.add_child(minion_node)
+	else:
+		enemy_minions.append(minion_node)
+		enemy_minions_container.add_child(minion_node)
 
 	_update_ui()
 
@@ -114,3 +115,14 @@ func _update_ui() -> void:
 		player_altar_label.text = str(player_altar_health)
 	if enemy_altar_label:
 		enemy_altar_label.text = str(enemy_altar_health)
+
+func _can_drop_data(at_position: Vector2, data: Variant) -> bool:
+	if typeof(data) == TYPE_DICTIONARY and data.has("type") and data["type"] == "card":
+		return can_play_card(data["resource"], true)
+	return false
+
+func _drop_data(at_position: Vector2, data: Variant) -> void:
+	if typeof(data) == TYPE_DICTIONARY and data.has("type") and data["type"] == "card":
+		play_card(data["resource"], true)
+		if data.has("source") and is_instance_valid(data["source"]):
+			data["source"].queue_free()

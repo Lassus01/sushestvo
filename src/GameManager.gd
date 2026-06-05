@@ -20,8 +20,17 @@ var dialogue_scene = preload("res://scenes/Dialogue/DialogueScene.tscn")
 signal state_changed(new_state: GameState)
 signal sanity_changed(new_amount: int)
 
+
 func _ready() -> void:
 	print("GameManager initialized. Dark Rituals begin.")
+
+func start_dialogue(timeline: String) -> void:
+	if Engine.has_singleton("Dialogic"):
+		var dialog = ClassDB.instantiate("Dialogic")
+		# This requires dialogic integration for Godot 4, for now just print
+		print("Starting timeline: ", timeline)
+		# Dialogic.start(timeline)
+
 
 func enter_node(node_data: Dictionary) -> void:
 	# node_data содержит инфу из MapGenerator
