@@ -2,6 +2,8 @@
 
 [ext_resource type="PackedScene" uid="uid://bcb1n0n813" path="res://scenes/Combat/BoardController.tscn" id="1_clt1"]
 [ext_resource type="Script" path="res://scenes/Combat/HandContainer.gd" id="2_hand_script"]
+[ext_resource type="Script" path="res://src/AIController.gd" id="3_aicontroller"]
+[ext_resource type="Script" path="res://src/CombatSystem.gd" id="4_combatsystem"]
 
 [sub_resource type="Environment" id="Environment_1"]
 background_mode = 3
@@ -100,3 +102,11 @@ theme_override_colors/font_color = Color(1.5, 0.2, 0.2, 1)
 text = "Завершить ход"
 
 [node name="CombatSystem" type="Node" parent="."]
+script = ExtResource("4_combatsystem")
+
+[node name="AIController" type="Node" parent="."]
+script = ExtResource("3_aicontroller")
+
+[node name="AmbientMusic" type="AudioStreamPlayer" parent="."]
+
+[node name="SFXPlayer" type="AudioStreamPlayer" parent="."]
