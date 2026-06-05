@@ -1,4 +1,4 @@
-class_name GameManager
+# class_name GameManager
 extends Node
 
 # Глобальный синглтон (Autoload: "GameManager")

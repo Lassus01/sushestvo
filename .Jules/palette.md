@@ -7,3 +7,6 @@
 ## 2024-05-18 - Background Decorative Elements
 **Learning:** Purely decorative animated background elements (such as 3D canvases for visual flair) should be hidden from assistive technologies to avoid screen reader noise.
 **Action:** Added `aria-hidden="true"` to the `#bg-eyes-container` element.
+## 2024-06-05 - Godot Autoload Class Name Collision
+**Learning:** In Godot 4, using `class_name` matching the registered name of an Autoload singleton (e.g., `class_name GameManager` with autoload `GameManager`) results in a "hides an autoload singleton" Parse Error when loading scripts in headless/editor checks.
+**Action:** Comment out or remove the `class_name` declaration in GDScripts that are registered as global singletons.

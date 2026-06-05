@@ -1,0 +1,44 @@
+[gd_scene load_steps=2 format=3 uid="uid://bcb1n0n813"]
+
+[ext_resource type="Script" path="res://src/BoardController.gd" id="1_bdcl1"]
+
+[node name="BoardController" type="PanelContainer"]
+custom_minimum_size = Vector2(300, 600)
+script = ExtResource("1_bdcl1")
+
+[node name="LaneUI" type="VBoxContainer" parent="."]
+layout_mode = 2
+theme_override_constants/separation = 10
+alignment = 1
+
+[node name="EnemyAltar" type="VBoxContainer" parent="LaneUI"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="LaneUI/EnemyAltar"]
+layout_mode = 2
+text = "40"
+horizontal_alignment = 1
+
+[node name="EnemyMinions" type="HBoxContainer" parent="LaneUI"]
+custom_minimum_size = Vector2(0, 150)
+layout_mode = 2
+alignment = 1
+
+[node name="ConflictZone" type="Control" parent="LaneUI"]
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+
+[node name="PlayerMinions" type="HBoxContainer" parent="LaneUI"]
+custom_minimum_size = Vector2(0, 150)
+layout_mode = 2
+alignment = 1
+
+[node name="PlayerAltar" type="VBoxContainer" parent="LaneUI"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="LaneUI/PlayerAltar"]
+layout_mode = 2
+text = "40"
+horizontal_alignment = 1
+
+[node name="LocalManaManager" type="Node" parent="."]

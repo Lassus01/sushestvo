@@ -1,4 +1,4 @@
-class_name MapGenerator
+# class_name MapGenerator
 extends Node
 
 # Генерирует направленный ациклический граф (DAG) для глобальной карты
